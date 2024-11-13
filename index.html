@@ -22,49 +22,25 @@
     <label for="eps">EPS:</label>
     <input type="text" id="eps" placeholder="Nhập EPS (ví dụ: 5)">
 
-    <button onclick="fetchIntrinsicValue()">Tính Giá Trị Nội Tại</button>
+    <button onclick="calculateIntrinsicValue()">Tính Giá Trị Nội Tại</button>
 
     <div id="result"></div>
 
     <script>
-        async function fetchIntrinsicValue() {
-            const apiKey = "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"; // Thay bằng API Key của bạn
+        function calculateIntrinsicValue() {
             const ticker = document.getElementById("ticker").value;
-            const eps = document.getElementById("eps").value;
+            const eps = parseFloat(document.getElementById("eps").value);
 
-            if (!ticker || !eps) {
-                alert("Vui lòng nhập mã chứng khoán và EPS.");
+            if (!ticker || isNaN(eps)) {
+                alert("Vui lòng nhập mã chứng khoán và EPS hợp lệ.");
                 return;
             }
 
-            const prompt = `Calculate intrinsic value for stock ${ticker} with EPS of ${eps}.`;
+            // Tính toán giá trị nội tại theo công thức EVA
+            const intrinsicValue = eps * 15;
 
-            try {
-                const response = await fetch("https://api.openai.com/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "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"
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-4",
-                        messages: [
-                            { "role": "system", "content": "You are Equity Valuation Advisor (EVA). Calculate intrinsic value by multiplying EPS by 15 and output in the format: INTRINSIC VALUE = [result]." },
-                            { "role": "user", "content": prompt }
-                        ],
-                        max_tokens: 50,
-                        temperature: 0
-                    })
-                });
-
-                const data = await response.json();
-                const intrinsicValue = data.choices[0].message.content.trim();
-
-                document.getElementById("result").innerText = `Kết quả: ${intrinsicValue}`;
-            } catch (error) {
-                console.error("Lỗi:", error);
-                document.getElementById("result").innerText = "Đã xảy ra lỗi khi tính toán giá trị.";
-            }
+            document.getElementById("result").innerText = 
+                `Giá Trị Nội Tại của ${ticker.toUpperCase()}: ${intrinsicValue.toFixed(2)}`;
         }
     </script>
 </body>
