@@ -54,11 +54,11 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer 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` // Thay YOUR_API_KEY bằng API Key của bạn
+                    "Authorization": 'Bearer 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' // Thay YOUR_API_KEY bằng API Key của bạn
                 },
                 body: JSON.stringify({
                     model: "text-davinci-003", // Hoặc "gpt-4" nếu bạn có quyền truy cập
-                    prompt: `Định giá cổ phiếu với thông tin: ${prompt}`,
+                    prompt: 'Định giá cổ phiếu với thông tin: ${prompt}',
                     max_tokens: 150
                 })
             });
