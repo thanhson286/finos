@@ -1,81 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Valuation ChatGPT</title>
+    <title>Equity Valuation Advisor (EVA)</title>
     <style>
-        /* CSS để tạo giao diện chatbot */
-        #chatGPTContainer {
-            border: 1px solid #ddd;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 500px;
-            font-family: Arial, sans-serif;
-        }
-        #chatGPTContainer h3 {
-            color: #4CAF50;
-            text-align: center;
-        }
-        #chatInput {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        #sendButton {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-        }
-        #chatResponse {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-        }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+        label { display: block; margin-top: 10px; }
+        input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; }
+        button { padding: 10px 15px; margin-top: 15px; cursor: pointer; }
+        #result { margin-top: 20px; font-weight: bold; color: green; }
     </style>
 </head>
 <body>
-    <!-- Giao diện ChatGPT cho định giá cổ phiếu -->
-    <div id="chatGPTContainer">
-        <h3>Định Giá Cổ Phiếu ChatGPT</h3>
-        <input type="text" id="chatInput" placeholder="Nhập mã cổ phiếu, LNST, cổ tức tiền mặt">
-        <button id="sendButton" onclick="handleChatGPT()">Gửi</button>
-        <div id="chatResponse">Câu trả lời sẽ xuất hiện ở đây...</div>
-    </div>
+    <h1>Equity Valuation Advisor (EVA)</h1>
+    <p>Nhập mã chứng khoán và EPS để tính giá trị nội tại.</p>
 
-    <!-- Script gọi OpenAI API -->
+    <label for="ticker">Mã Chứng Khoán:</label>
+    <input type="text" id="ticker" placeholder="Nhập mã chứng khoán (ví dụ: AAPL)">
+
+    <label for="eps">EPS:</label>
+    <input type="text" id="eps" placeholder="Nhập EPS (ví dụ: 5)">
+
+    <button onclick="fetchIntrinsicValue()">Tính Giá Trị Nội Tại</button>
+
+    <div id="result"></div>
+
     <script>
-        async function callGPT(prompt) {
-            const response = await fetch("https://api.openai.com/v1/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": 'Bearer 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' // Thay YOUR_API_KEY bằng API Key của bạn
-                },
-                body: JSON.stringify({
-                    model: "text-davinci-003", // Hoặc "gpt-4" nếu bạn có quyền truy cập
-                    prompt: 'Định giá cổ phiếu với thông tin: ${prompt}',
-                    max_tokens: 150
-                })
-            });
+        async function fetchIntrinsicValue() {
+            const apiKey = "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"; // Thay bằng API Key của bạn
+            const ticker = document.getElementById("ticker").value;
+            const eps = document.getElementById("eps").value;
 
-            const data = await response.json();
-            return data.choices[0].text.trim();
-        }
+            if (!ticker || !eps) {
+                alert("Vui lòng nhập mã chứng khoán và EPS.");
+                return;
+            }
 
-        async function handleChatGPT() {
-            const prompt = document.getElementById("chatInput").value;
-            document.getElementById("chatResponse").innerText = "Đang xử lý...";
+            const prompt = `Calculate intrinsic value for stock ${ticker} with EPS of ${eps}.`;
 
             try {
-                const response = await callGPT(prompt);
-                document.getElementById("chatResponse").innerText = response;
+                const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "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"
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4",
+                        messages: [
+                            { "role": "system", "content": "You are Equity Valuation Advisor (EVA). Calculate intrinsic value by multiplying EPS by 15 and output in the format: INTRINSIC VALUE = [result]." },
+                            { "role": "user", "content": prompt }
+                        ],
+                        max_tokens: 50,
+                        temperature: 0
+                    })
+                });
+
+                const data = await response.json();
+                const intrinsicValue = data.choices[0].message.content.trim();
+
+                document.getElementById("result").innerText = `Kết quả: ${intrinsicValue}`;
             } catch (error) {
-                document.getElementById("chatResponse").innerText = "Có lỗi xảy ra. Vui lòng thử lại.";
+                console.error("Lỗi:", error);
+                document.getElementById("result").innerText = "Đã xảy ra lỗi khi tính toán giá trị.";
             }
         }
     </script>
